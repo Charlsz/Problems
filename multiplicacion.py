@@ -2,58 +2,56 @@ import random
 import time
 import matplotlib.pyplot as plt
 
-def karatsuba(x, y):
-    # Si los números son de un solo dígito, realiza una multiplicación simple
-    timea = time.time()
-    if x < 10 or y < 10:
-        return x * y
-
-    # Calcula el número de dígitos de los números
-    n = max(len(str(x)), len(str(y)))
-    n2 = n // 2
-
-    # Divide los números en partes más pequeñas
-    a, b = divmod(x, 10**n2)
-    c, d = divmod(y, 10**n2)
-
-    # Calcula los productos intermedios recursivamente
-    ac = karatsuba(a, c)
-    bd = karatsuba(b, d)
-    ad_bc = karatsuba((a + b), (c + d)) - ac - bd
-
-    # Calcula el resultado final
-    result = ac * 10**(2 * n2) + ad_bc * 10**n2 + bd
-    timeb = time.time()
-    print(f"Tiempoo en la funcion: {timeb-timea}")
+# Función para multiplicar dos números de N pares de cifras
+def multiply_large_numbers(N):
+    num1 = random.randint(10**(N-1), 10**N - 1)
+    num2 = random.randint(10**(N-1), 10**N - 1)
+    result = num1 * num2
     return result
 
-# Listas para almacenar los tamaños de entrada (n) y los tiempos de ejecución
-input_sizes = []
-execution_times = []
+# Función para calcular la complejidad teórica (O(N^2))
+def theoretical_complexity(N):
+    return N**2
 
-# Generar números aleatorios y medir el tiempo de ejecución para diferentes tamaños de entrada
-for n in range(1, 7):
-    num1 = random.randint(10**(n-1), 10**n - 1)
-    num2 = random.randint(10**(n-1), 10**n - 1)
-    start_time = time.time()
-    resultado = karatsuba(num1, num2)
-    end_time = time.time()
-    elapsed_time = (end_time - start_time)
-    input_sizes.append(n)
-    execution_times.append(elapsed_time)
-    print(f"Tamaño de entrada n={n}: Tiempo de ejecución = {elapsed_time:.15f} segundos")
+# Función para calcular la complejidad práctica (medición de tiempo promedio)
+def practical_complexity(N, num_samples=1000):
+    total_time = 0
+    for _ in range(num_samples):
+        start_time = time.time()
+        multiply_large_numbers(N)
+        end_time = time.time()
+        total_time += end_time - start_time
+    average_time = total_time / num_samples
+    return average_time
 
-# Crear una gráfica de complejidad práctica
-plt.figure(figsize=(10, 6))
-plt.plot(input_sizes, execution_times, marker='o', label='Tiempo de Ejecución Práctico')
-plt.xlabel('Tamaño de Entrada (n)')
-plt.ylabel('Tiempo de Ejecución (segundos)')
+# Crear listas para almacenar los valores de N y las complejidades
+N_values = []
+theoretical_complexities = []
+practical_complexities = []
 
-# Generar la gráfica de complejidad teórica O(n^1.585)
-theoretical_complexity = [n ** 1.585 for n in input_sizes]
-plt.plot(input_sizes, theoretical_complexity, linestyle='--', label='Complejidad Teórica O(n^1.585)')
+# Calcular complejidades para diferentes valores de N
+for N in range(1, 11):
+    N_values.append(N)
+    theoretical_complexities.append(theoretical_complexity(N))
+    practical_complexities.append(practical_complexity(N))
 
+# Graficar complejidad teórica
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1)
+plt.plot(N_values, theoretical_complexities, label='Complejidad Teórica (O(N^2))')
+plt.xlabel('N')
+plt.ylabel('Tiempo / Complejidad')
 plt.legend()
-plt.title('Complejidad Práctica vs. Complejidad Teórica')
-plt.grid(True)
+plt.title('Complejidad Teórica')
+
+# Graficar complejidad práctica
+plt.subplot(1, 2, 2)
+plt.plot(N_values, practical_complexities, label='Complejidad Práctica Promedio')
+plt.xlabel('N')
+plt.ylabel('Tiempo (Promedio)')
+plt.legend()
+plt.title('Complejidad Práctica')
+
+plt.tight_layout()
 plt.show()
+
